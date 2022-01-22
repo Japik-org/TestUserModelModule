@@ -34,10 +34,23 @@ public final class Crypt {
     }
 
     public static boolean checkUserSign(byte[] sign, byte[] secret, byte[] salt){
-        return Arrays.equals(Hashing.sha256().hashBytes(
-                composeSalt(
-                        secret, salt
-                )
+        return Arrays.equals(
+                Hashing.sha256().hashBytes(
+                    composeSalt(
+                            secret, salt
+                    )
         ).asBytes(), sign);
+    }
+
+    public static byte[] createUserPass(byte[] pass, byte[] userSalt, byte[] localSalt){
+        return Hashing.sha256().hashBytes(
+                        mergeBytes(
+                                pass,
+                                composeSalt(
+                                        userSalt,
+                                        localSalt
+                                )
+                        )
+        ).asBytes();
     }
 }

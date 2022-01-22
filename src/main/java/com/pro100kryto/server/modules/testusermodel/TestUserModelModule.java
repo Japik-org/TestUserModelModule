@@ -1,7 +1,5 @@
 package com.pro100kryto.server.modules.testusermodel;
 
-import com.pro100kryto.server.livecycle.AShortLiveCycleImpl;
-import com.pro100kryto.server.livecycle.ILiveCycleImpl;
 import com.pro100kryto.server.module.AModule;
 import com.pro100kryto.server.module.BaseModuleSettings;
 import com.pro100kryto.server.module.ModuleConnectionParams;
@@ -26,33 +24,5 @@ public final class TestUserModelModule extends AModule<IUserModelModuleConnectio
         settings.put(BaseModuleSettings.KEY_CONNECTION_CREATE_AFTER_INIT_ENABLED, true);
 
         super.setupSettingsBeforeInit();
-    }
-
-    @Override
-    protected @NotNull ILiveCycleImpl createDefaultLiveCycleImpl() {
-        return new TestUsersModelModuleLiveCycleImpl();
-    }
-
-    private final class TestUsersModelModuleLiveCycleImpl extends AShortLiveCycleImpl {
-
-        @Override
-        public void init() throws Throwable {
-
-        }
-
-        @Override
-        public void start() throws Throwable {
-
-        }
-
-        @Override
-        public void stopForce() {
-
-        }
-
-        @Override
-        public void destroy() {
-
-        }
     }
 }

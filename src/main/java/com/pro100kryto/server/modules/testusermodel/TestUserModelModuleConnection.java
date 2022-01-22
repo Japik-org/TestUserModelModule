@@ -25,16 +25,13 @@ public class TestUserModelModuleConnection extends AModuleConnection<TestUserMod
     private final byte[] localSalt = "JwfKT1Wj".getBytes(StandardCharsets.UTF_8);
 
     private final String userTesterName = "Tester";
-    private final String userTesterPass = "1234";
+    private final byte[] userTesterPass = "1234".getBytes(StandardCharsets.UTF_8);
 
     public TestUserModelModuleConnection(@NotNull TestUserModelModule module, ModuleConnectionParams params) {
         super(module, params);
 
         createUser(userTesterName,
-                hashPass(
-                        userTesterPass.getBytes(StandardCharsets.UTF_8),
-                        clientSalt
-                )
+                hashPass(userTesterPass, clientSalt)
         );
     }
 

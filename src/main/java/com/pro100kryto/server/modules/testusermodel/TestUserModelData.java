@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,12 +71,19 @@ public final class TestUserModelData implements IUserModelData {
 
     @Override
     public boolean checkPass(byte[] pass) {
-        return true; // TODO: check pass
+        return Arrays.equals(
+                getPassHash(),
+                createUserPass(
+                    pass,
+                    getPassSalt(),
+                    localSalt
+                )
+        );
     }
 
     @Override
     public void setPass(byte[] pass, byte[] salt) {
-        keyValueMap.put("passHash", hashPass(pass, mergeBytes(salt, localSalt)));
+        keyValueMap.put("passHash", createUserPass(pass, salt, localSalt));
         keyValueMap.put("passSalt", salt);
     }
 
