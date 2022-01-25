@@ -1,8 +1,5 @@
 package com.pro100kryto.server.modules.testusermodel;
 
-import com.google.common.hash.Hashing;
-
-import java.util.Arrays;
 import java.util.Random;
 
 public final class Crypt {
@@ -21,36 +18,4 @@ public final class Crypt {
         return bytes;
     }
 
-    public static byte[] hashPass(byte[] pass, byte[] salt){
-        return Hashing.sha512().hashBytes(
-                mergeBytes(pass, salt)
-        ).asBytes();
-    }
-
-    public static byte[] composeSalt(byte[] saltA, byte[] saltB){
-        return Hashing.sha256().hashBytes(
-                mergeBytes(saltA, saltB)
-        ).asBytes();
-    }
-
-    public static boolean checkUserSign(byte[] sign, byte[] secret, byte[] salt){
-        return Arrays.equals(
-                Hashing.sha256().hashBytes(
-                    composeSalt(
-                            secret, salt
-                    )
-        ).asBytes(), sign);
-    }
-
-    public static byte[] createUserPass(byte[] pass, byte[] userSalt, byte[] localSalt){
-        return Hashing.sha256().hashBytes(
-                        mergeBytes(
-                                pass,
-                                composeSalt(
-                                        userSalt,
-                                        localSalt
-                                )
-                        )
-        ).asBytes();
-    }
 }
