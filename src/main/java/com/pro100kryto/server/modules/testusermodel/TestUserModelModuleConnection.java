@@ -37,6 +37,7 @@ public class TestUserModelModuleConnection extends AModuleConnection<TestUserMod
         super(module, params);
 
         createUser(userTesterName,
+                userTesterName+"@email.test",
                 Hashing.sha512().hashBytes(
                         mergeBytes(userTesterPass, clientSalt)
                 ).asBytes()
@@ -44,7 +45,7 @@ public class TestUserModelModuleConnection extends AModuleConnection<TestUserMod
     }
 
     @Override
-    public IUserModelData createUser(String nickname, byte[] pass) throws RemoteException {
+    public IUserModelData createUser(String nickname, String email, byte[] pass) throws RemoteException {
         try {
             final byte[] userSalt = module.getPassCrypt().randomSalt();
 
@@ -58,6 +59,7 @@ public class TestUserModelModuleConnection extends AModuleConnection<TestUserMod
                     userSalt
             );
             userIdDataStorageMap.put(userDataStorage.getUserId(), userDataStorage);
+            userDataStorage.put("email", email);
 
             return createAccess(userDataStorage);
 
