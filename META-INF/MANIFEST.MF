@@ -1,3 +1,8 @@
 Manifest-Version: 1.0
+
+Name: Module-Impl
+Shared-Subtype: UserModel
+Subtype: TestUserModel
+Version: 0.2
 Base-Package: com.pro100kryto.server
-Connection-Type: UserModel
+Module-Shared-Subtype: Crypt
