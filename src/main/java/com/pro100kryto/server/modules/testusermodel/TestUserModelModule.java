@@ -34,7 +34,6 @@ public final class TestUserModelModule extends AModule<IUserModelModuleConnectio
     }
 
     public ICryptModuleConnection getPassCrypt() throws RemoteException {
-        final ClassLoader cl = ICryptModuleConnection.class.getClassLoader();
         return passCryptModuleConnectionSafe.getModuleConnection();
     }
 

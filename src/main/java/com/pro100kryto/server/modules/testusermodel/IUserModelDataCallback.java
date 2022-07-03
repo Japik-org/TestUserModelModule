@@ -6,5 +6,4 @@ import java.rmi.RemoteException;
 
 public interface IUserModelDataCallback {
     ICryptModuleConnection getPassCrypt() throws RemoteException;
-    void onCloseDataAccess(long accessId);
 }

@@ -1,133 +1,107 @@
 package com.pro100kryto.server.modules.testusermodel;
 
-import com.google.common.hash.Hashing;
 import com.pro100kryto.server.module.AModuleConnection;
-import com.pro100kryto.server.module.ModuleConnectionException;
 import com.pro100kryto.server.module.ModuleConnectionParams;
-import com.pro100kryto.server.modules.usermodel.connection.IUserModelData;
-import com.pro100kryto.server.modules.usermodel.connection.IUserModelModuleConnection;
-import com.pro100kryto.server.modules.usermodel.connection.UserNotFoundException;
 import com.pro100kryto.server.modules.crypt.connection.ICryptModuleConnection;
+import com.pro100kryto.server.modules.usermodel.connection.IUserModel;
+import com.pro100kryto.server.modules.usermodel.connection.IUserModelModuleConnection;
+import com.pro100kryto.server.modules.usermodel.connection.UserAlreadyExistsException;
+import com.pro100kryto.server.modules.usermodel.connection.UserNotFoundException;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-import static com.pro100kryto.server.modules.testusermodel.Crypt.*;
+import static com.pro100kryto.server.modules.testusermodel.TestUserModelData.KEY_USERNAME;
 
-public class TestUserModelModuleConnection extends AModuleConnection<TestUserModelModule, IUserModelModuleConnection>
+public final class TestUserModelModuleConnection extends AModuleConnection<TestUserModelModule, IUserModelModuleConnection>
         implements IUserModelModuleConnection, IUserModelDataCallback {
 
-    private final LongObjectHashMap<TestUserModelDataAccess> accessIdDataAccessMap = new LongObjectHashMap<>(64);
-    private final LongObjectHashMap<TestUserModelDataStorage> userIdDataStorageMap = new LongObjectHashMap<>(64);
-
-    private final AtomicLong accessIdCounter = new AtomicLong(0);
-    private final AtomicLong userIdCounter = new AtomicLong(0);
-
-    private final byte[] clientSalt = "LN9tFnhm".getBytes(StandardCharsets.UTF_8);
-
-    private final String userTesterName = "Tester";
-    private final byte[] userTesterPass = "1234".getBytes(StandardCharsets.UTF_8);
+    private final LongObjectHashMap<TestUserModelData> userIdDataMap = new LongObjectHashMap<>(64);
+    private final AtomicInteger userIdCounter = new AtomicInteger(0);
 
     public TestUserModelModuleConnection(@NotNull TestUserModelModule module, ModuleConnectionParams params)
             throws RemoteException {
-
         super(module, params);
-
-        createUser(userTesterName,
-                userTesterName+"@email.test",
-                Hashing.sha512().hashBytes(
-                        mergeBytes(userTesterPass, clientSalt)
-                ).asBytes()
-        );
     }
 
     @Override
-    public IUserModelData createUser(String nickname, String email, byte[] pass) throws RemoteException {
-        try {
-            final byte[] userSalt = module.getPassCrypt().randomSalt();
-
-            final TestUserModelDataStorage userDataStorage = new TestUserModelDataStorage(
-                    userIdCounter.getAndIncrement(),
-                    userTesterName,
-                    module.getPassCrypt().crypt(
-                            pass,
-                            userSalt
-                    ),
-                    userSalt
-            );
-            userIdDataStorageMap.put(userDataStorage.getUserId(), userDataStorage);
-            userDataStorage.put("email", email);
-
-            return createAccess(userDataStorage);
-
-        } catch (Throwable throwable){
-            throw new ModuleConnectionException(
-                    module.getService().getName(),
-                    getModuleName(),
-                    throwable
-            );
+    public synchronized IUserModel createUser(String username, byte[] pass) throws RemoteException, UserAlreadyExistsException {
+        if (userIdDataMap.values().stream().anyMatch(data -> Objects.equals(data.get(KEY_USERNAME), username))) {
+            throw new UserAlreadyExistsException(KEY_USERNAME, username);
         }
+
+        final byte[] userSalt = module.getPassCrypt().randomSalt(Consts.SALT_LEN);
+        final TestUserModelData userData = new TestUserModelData(
+                userIdCounter.getAndIncrement(),
+                username,
+                module.getPassCrypt().crypt(
+                        pass,
+                        userSalt
+                ),
+                userSalt
+        );
+
+        userIdDataMap.put(userData.getId(), userData);
+        return getUserModel(userData);
     }
 
     @Override
     public boolean existsUserByUserId(long userId) {
-        return userIdDataStorageMap.containsKey(userId);
+        return userIdDataMap.containsKey(userId);
     }
 
     @Override
     public boolean existsUserByKeyVal(Object key, Object val) {
-        for (final TestUserModelDataStorage userDataStorage : userIdDataStorageMap) {
-            final Object val2 = userDataStorage.get(key);
-            if (val2 == null) continue;
-            if (val.equals( val2 )){
-                return true;
-            }
-        }
-        return false;
+        return userIdDataMap.values().stream()
+                .anyMatch(data -> Objects.equals(data.get(key), val));
     }
 
     @Override
-    public IUserModelData getUserByUserId(long userId) throws UserNotFoundException {
-        final TestUserModelDataStorage userDataStorage = userIdDataStorageMap.get(userId);
-        if (userDataStorage == null) {
-            throw new UserNotFoundException("userId", userId);
+    public IUserModel getUserByUserId(long userId) throws UserNotFoundException {
+        final TestUserModelData userData = userIdDataMap.get(userId);
+        if (userData == null) {
+            throw new UserNotFoundException(TestUserModelData.KEY_ID, userId);
         }
-
-        return createAccess(userDataStorage);
+        return getUserModel(userData);
     }
 
     @Override
-    public IUserModelData getUserByKeyVal(Object key, Object val) throws UserNotFoundException {
-        for (final TestUserModelDataStorage userDataStorage : userIdDataStorageMap) {
-            final Object val2 = userDataStorage.get(key);
+    public IUserModel getOneUserByKeyVal(Object key, Object val) throws UserNotFoundException {
+        for (final TestUserModelData userData : userIdDataMap) {
+            final Object val2 = userData.get(key);
             if (val2 == null) continue;
             if (val.equals( val2 )){
-                return createAccess(userDataStorage);
+                return getUserModel(userData);
             }
         }
         throw new UserNotFoundException(key, val);
     }
 
     @Override
+    public Iterable<IUserModel> getUsersByKeyVal(Object key, Object val) throws RemoteException {
+        return userIdDataMap.values().stream()
+                .filter(data -> Objects.equals(data.get(key), val))
+                .map(this::getUserModel)
+                .collect(Collectors.toList());
+    }
+
+    // callback
+
+    @Override
     public ICryptModuleConnection getPassCrypt() throws RemoteException {
         return module.getPassCrypt();
     }
 
-    @Override
-    public void onCloseDataAccess(long accessId) {
-        accessIdDataAccessMap.remove(accessId);
-    }
+    // private
 
-    private IUserModelData createAccess(TestUserModelDataStorage userDataStorage) {
-        final TestUserModelDataAccess userModelDataAccess = new TestUserModelDataAccess(
+    private IUserModel getUserModel(TestUserModelData userData) {
+        return new TestUserModel(
                 this,
-                userDataStorage,
-                accessIdCounter.getAndIncrement()
+                userData
         );
-        accessIdDataAccessMap.put(userModelDataAccess.getAccessId(), userModelDataAccess);
-        return userModelDataAccess;
     }
 }
