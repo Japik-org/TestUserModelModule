@@ -1,6 +1,6 @@
-package com.pro100kryto.server.modules.testusermodel;
+package com.japik.modules.testusermodel;
 
-import com.pro100kryto.server.modules.usermodel.connection.IUserModel;
+import com.japik.modules.usermodel.connection.IUserModel;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.rmi.RemoteException;
 import java.util.Map;
 
-import static com.pro100kryto.server.modules.testusermodel.TestUserModelData.*;
+import static com.japik.modules.testusermodel.TestUserModelData.*;
 
 public class TestUserModel implements IUserModel {
     private final IUserModelDataCallback callback;

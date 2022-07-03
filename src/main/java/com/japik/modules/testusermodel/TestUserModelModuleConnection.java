@@ -1,12 +1,12 @@
-package com.pro100kryto.server.modules.testusermodel;
+package com.japik.modules.testusermodel;
 
-import com.pro100kryto.server.module.AModuleConnection;
-import com.pro100kryto.server.module.ModuleConnectionParams;
-import com.pro100kryto.server.modules.crypt.connection.ICryptModuleConnection;
-import com.pro100kryto.server.modules.usermodel.connection.IUserModel;
-import com.pro100kryto.server.modules.usermodel.connection.IUserModelModuleConnection;
-import com.pro100kryto.server.modules.usermodel.connection.UserAlreadyExistsException;
-import com.pro100kryto.server.modules.usermodel.connection.UserNotFoundException;
+import com.japik.module.AModuleConnection;
+import com.japik.module.ModuleConnectionParams;
+import com.japik.modules.crypt.connection.ICryptModuleConnection;
+import com.japik.modules.usermodel.connection.IUserModel;
+import com.japik.modules.usermodel.connection.IUserModelModuleConnection;
+import com.japik.modules.usermodel.connection.UserAlreadyExistsException;
+import com.japik.modules.usermodel.connection.UserNotFoundException;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,8 +14,6 @@ import java.rmi.RemoteException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static com.pro100kryto.server.modules.testusermodel.TestUserModelData.KEY_USERNAME;
 
 public final class TestUserModelModuleConnection extends AModuleConnection<TestUserModelModule, IUserModelModuleConnection>
         implements IUserModelModuleConnection, IUserModelDataCallback {
@@ -30,8 +28,8 @@ public final class TestUserModelModuleConnection extends AModuleConnection<TestU
 
     @Override
     public synchronized IUserModel createUser(String username, byte[] pass) throws RemoteException, UserAlreadyExistsException {
-        if (userIdDataMap.values().stream().anyMatch(data -> Objects.equals(data.get(KEY_USERNAME), username))) {
-            throw new UserAlreadyExistsException(KEY_USERNAME, username);
+        if (userIdDataMap.values().stream().anyMatch(data -> Objects.equals(data.get(TestUserModelData.KEY_USERNAME), username))) {
+            throw new UserAlreadyExistsException(TestUserModelData.KEY_USERNAME, username);
         }
 
         final byte[] userSalt = module.getPassCrypt().randomSalt(Consts.SALT_LEN);

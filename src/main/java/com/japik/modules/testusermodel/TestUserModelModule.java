@@ -1,11 +1,11 @@
-package com.pro100kryto.server.modules.testusermodel;
+package com.japik.modules.testusermodel;
 
-import com.pro100kryto.server.livecycle.EmptyLiveCycleImpl;
-import com.pro100kryto.server.livecycle.controller.ILiveCycleImplId;
-import com.pro100kryto.server.livecycle.controller.LiveCycleController;
-import com.pro100kryto.server.module.*;
-import com.pro100kryto.server.modules.crypt.connection.ICryptModuleConnection;
-import com.pro100kryto.server.modules.usermodel.connection.IUserModelModuleConnection;
+import com.japik.livecycle.EmptyLiveCycleImpl;
+import com.japik.livecycle.controller.ILiveCycleImplId;
+import com.japik.livecycle.controller.LiveCycleController;
+import com.japik.module.*;
+import com.japik.modules.crypt.connection.ICryptModuleConnection;
+import com.japik.modules.usermodel.connection.IUserModelModuleConnection;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;

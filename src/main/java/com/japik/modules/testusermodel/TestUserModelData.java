@@ -1,4 +1,4 @@
-package com.pro100kryto.server.modules.testusermodel;
+package com.japik.modules.testusermodel;
 
 import lombok.Getter;
 

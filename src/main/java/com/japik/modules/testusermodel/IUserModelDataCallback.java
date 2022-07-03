@@ -1,6 +1,6 @@
-package com.pro100kryto.server.modules.testusermodel;
+package com.japik.modules.testusermodel;
 
-import com.pro100kryto.server.modules.crypt.connection.ICryptModuleConnection;
+import com.japik.modules.crypt.connection.ICryptModuleConnection;
 
 import java.rmi.RemoteException;
 
